@@ -1,95 +1,81 @@
-livros_disponiveis = []
-livros_alugados = []
+biblioteca = {
+    'disponiveis': [],
+    'alugados': []
+}
 
-def listar_livros(opcao):
-    if opcao == 1:
-        print("Livros Disponiveis: ")
-        if livros_disponiveis:
-            cont = 1
-            for l, a in livros_disponiveis:
-                print(f'{cont} - Titulo: {l} - Autor: {a}')
-                cont += 1
-        else:
-            print("Não há livros disponíveis para listar.")
-    if opcao == 5:
-        print("Livros Alugados: ")
-        if livros_alugados:
-            cont = 1
-            for l, a in livros_alugados:
-                print(f'{cont} - Titulo: {l} - Autor: {a}')
-                cont += 1
-        else:
-            print("Não há livros alugados para listar.")
+def listar_livros(categoria, titulo_categoria):
+    print(f"\n{titulo_categoria}: ")
+    livros = biblioteca[categoria]
+
+    if not livros:
+        print("Nenhum livro para listar.")
+        return
+
+    for i, (titulo, autor) in enumerate(livros, start=1):
+        print(f"{i} - Titulo: {titulo} | Autor: {autor}")
 
 def adicionar_livro(titulo, autor):
-    livros_disponiveis.append((titulo, autor))
+    biblioteca['disponiveis'].append((titulo, autor))
     print(f"O livro '{titulo}' de {autor} foi adicionado com sucesso.")
 
+def mover_livro(titulo, origem, destino, acao):
+    for i, (t, a) in enumerate(biblioteca[origem]):
+        if t == titulo:
+            livro = biblioteca[origem].pop(i)
+            biblioteca[destino].append(livro)
+            print(f"O livro '{titulo}' foi {acao} com sucesso!")
+            return
+    print(f"O livro '{titulo}' nao esta disponivel ou nao existe.")
+
 def remover_livro(titulo):
-    if any(tupla[0] == titulo for tupla in livros_disponiveis):
-        for i, tupla in enumerate(livros_disponiveis):
-            if tupla[0] == titulo:
-                del livros_disponiveis[i]
-                print(f"O livro '{titulo}' foi removido com sucesso.")
-                break
-    else:
-        print(f"O livro '{titulo}' não está disponível para remover.")
-
-def alugar_livro(titulo):
-    if any(tupla[0] == titulo for tupla in livros_disponiveis):
-        for i, tupla in enumerate(livros_disponiveis):
-            if tupla[0] == titulo:
-                livro = livros_disponiveis.pop(i)
-                livros_alugados.append(livro)
-                print(f"O livro '{titulo}' foi alugado com sucesso.")
-                break
-    else:
-        print(f"O livro '{titulo}' não está disponível para alugar.")
-
-def devolver_livro(titulo):
-    if any(tupla[0] == titulo for tupla in livros_alugados):
-        for i, tupla in enumerate(livros_alugados):
-            if tupla[0] == titulo:
-                livro = livros_alugados.pop(i)
-                livros_disponiveis.append(livro)
-                print(f"O livro '{titulo}' foi devolvido com sucesso.")
-                break
-    else:
-        print(f"O livro '{titulo}' não está disponível para devolver.")
-
+    for i, (t, _) in enumerate(biblioteca['disponiveis']):
+        if t == titulo:
+            biblioteca['disponiveis'].pop(i)
+            print(f"O livro '{titulo}' foi removido com sucesso.")
+            return
+    print(f"O livro '{titulo}' nao esta disponivel para remover ou nao existe.")
 
 while True:
-    print("\nMenu de Opções:")
-    print("1. Listar livros disponíveis.")
-    print("2. Adicionar livro.")
-    print("3. Remover Livro.")
-    print("4. Alugar Livro.")
-    print("5. Listar livros alugados.")
-    print("6. Devolver Livro.")
-    print("7. Sair")
+    print("""
+Menu de Opções:
+1. Listar livros disponíveis
+2. Adicionar livro
+3. Remover livro
+4. Alugar livro
+5. Listar livros alugados
+6. Devolver livro
+7. Sair
+""")
 
-    opcao = int(input("Escolha uma opção: "))
+    opcao = input("Escolha uma opcao: ")
 
-    if opcao == 1 or opcao == 5:
-        listar_livros(opcao)
+    match opcao:
+        case "1":
+            listar_livros("disponiveis", "Livros Disponiveis")
 
-    if opcao == 2:
-        titulo = input("Digite o titulo do livro que deseja adicionar: ")
-        autor = input("Digite o autor do livro que deseja adicionar: ")
-        adicionar_livro(titulo, autor)
+        case "2":
+            titulo = input("Digite o titulo: ")
+            autor = input("Digite o autor: ")
+            adicionar_livro(titulo, autor)
 
-    if opcao == 3:
-        titulo = input("Digite o titulo do livro que deseja remover: ")
-        remover_livro(titulo)
+        case "3":
+            titulo = input("Digite o titulo do livro a ser removido: ")
+            remover_livro(titulo)
 
-    if opcao == 4:
-        titulo = input("Digite o titulo do livro que deseja alugar: ")
-        alugar_livro(titulo)
+        case "4":
+            titulo = input("Digite o titulo do livro a ser alugado: ")
+            mover_livro(titulo, "disponiveis", "alugados", "alugado")
+        
+        case "5":
+            listar_livros("alugados", "Livros Alugados")
 
-    if opcao == 6:
-        titulo = input("Digite o titulo do livro que deseja devolver: ")
-        devolver_livro(titulo)
+        case "6":
+            titulo = input("Digite o titulo do livro a ser devolvido: ")
+            mover_livro(titulo, "alugados", "disponiveis", "devolvido")
 
-    if opcao == 7:
-        print("Saindo do programa...")
-        break
+        case "7":
+            print("Saindo do programa! ")
+            break
+
+        case _:
+            print("Opcao invalida! ")
